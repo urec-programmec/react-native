@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NodeJS</title>
+    <style>
+        body {
+            height:100vh;
+        }
+
+        .input {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+        }
+
+        .root {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .wh100 {
+            width: 500px;
+        }
+
+        .window {
+            height: 300px;
+            border: 1px solid black;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            width: 180px;
+            height: fit-content;
+            padding-left: 5px;
+            padding-right: 5px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+        }
+
+        .bot {
+            border-radius: 10px;
+            background: rgb(129, 178, 235);
+        }
+
+        .me {
+            border-radius: 10px;
+            background: rgb(235, 228, 129);
+        }
+
+        .messages {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            height: 70%;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="root">
+        <div class="row">
+            <div class="window wh100 row">
+                <div class="messages">
+                    <div class="message" id="get"></div>
+                    <div class="message bot" id="get2">Чур я пила! (выкатывается на трехколесном велосипеде)</div>
+                </div>
+                <div class="messages">
+                    <div class="message  me" id="send2">Ну што, поиграем в игру?</div>
+                    <div class="message" id="send"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <form id="ms" onsubmit="{send}">
+                <input class="input wh100" id="message" autofocus="on" placeholder="Введите послание"></input>
+            </form>
+        </div>
+    </div>
+    <script>
+        var issend = false;
+        var sendData = () => {
+            if (!issend){
+                issend = true;
+                let value = document.getElementById("message").value;
+                document.getElementById("send2").innerHTML = "";
+                document.getElementById("send").innerHTML = value;
+                document.getElementById("send2").classList.toggle("me");
+                document.getElementById("send").classList.toggle("me");
+
+                document.getElementById("get").innerHTML = document.getElementById("get2").innerHTML;
+                document.getElementById("get2").innerHTML = "";
+                document.getElementById("get2").classList.toggle("bot");
+                document.getElementById("get").classList.toggle("bot");
+
+                let xhr = new XMLHttpRequest();
+                
+                let json = JSON.stringify({
+                    "message": value
+                });
+                xhr.open("POST", "/take", true);
+                xhr.responseType = 'json';
+
+            
+                setTimeout(() => {xhr.send(json); issend = false;}, 1000);
+                
+                xhr.onload = function() {
+                    document.getElementById("send2").innerHTML = document.getElementById("send").innerHTML;
+                    document.getElementById("send").innerHTML = "";
+                    document.getElementById("send2").classList.toggle("me");
+                    document.getElementById("send").classList.toggle("me");
+
+                    document.getElementById("get").innerHTML = "";
+                    document.getElementById("get2").innerHTML = xhr.response["message"];
+                    document.getElementById("get2").classList.toggle("bot");
+                    document.getElementById("get").classList.toggle("bot");
+                };
+
+                xhr.onerror = function() { 
+                    console.log("Error!");
+                };
+            }
+            document.getElementById("message").value = "";
+
+            return false;
+        };
+    </script>
+</body>
+</html>
